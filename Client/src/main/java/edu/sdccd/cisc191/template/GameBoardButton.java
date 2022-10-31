@@ -9,13 +9,13 @@ import javafx.scene.control.Button;
 public class GameBoardButton extends Button {
     private int row;
     private int col;
-    private boolean hasShip;
+    //private boolean hasShip;
 
-    public GameBoardButton(int row, int col, boolean hasShip)
+    public GameBoardButton(int row, int col)
     {
         this.row = row;
         this.col = col;
-        this.hasShip = hasShip;
+       // this.hasShip = hasShip;
 
         setMinWidth(50);
         setMinHeight(50);
@@ -24,12 +24,7 @@ public class GameBoardButton extends Button {
         //setText("?");
 
     }
-
-    public int[] getLocation(){
-        int[] location = {row, col};
-        return location;
-    }
-    public void handleClick() {
+    public void handleClick(boolean hasShip) {
         if(hasShip) {
             setText("[X]");
         } else {

@@ -4,53 +4,44 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-public class GameEnemyBrain {
+public class ComputerPlayer extends Player{
+
     public int[][] internalGameBoard;
     protected boolean sink;
     protected boolean hit;
     protected int[] lastTarget;
-    public ArrayList<int[]> possibleTargets;
+    public ArrayList<TargetClass> possibleTargets;
 
-    /**
-     * Construct the enemy brain.
-     */
-    public GameEnemyBrain(){
-        hit = false;
-        sink = false;
-        lastTarget = new int[2];
-        lastTarget[0] = lastTarget[1] = -1;//Initialize last target to a location outside the board.
+    public ComputerPlayer(int dimension){
+        super(dimension);
+        this.name = "computer";
+        setInternalGameBoard(dimension);
     }
-
     /**
-     *
-     * @param dimension
-     * Creates an internal grid for tracking shots and hits.
-     */
-    public void setInternalGameBoard(int dimension){
+    * Creates an internal board to track shots and their effects.
+    */
+    private void setInternalGameBoard(int dimension){
         internalGameBoard = new int[dimension][dimension];
         possibleTargets = new ArrayList<>();
+        lastTarget = new int[2];
+
     }
-
     /**
-     *
-     * @param shotEffect
-     * Updates the enemy with the success of its last shot. Updates the internal game board to indicate a successful hit or miss.
-     */
-
-    public void update(boolean[] shotEffect, int[] target){
+    * Lets the Computer player know the effects of its last shot.
+    */
+    public void updateWithShotEffect(boolean[] shotEffect, int[] target){
+        //super.update(shotEffect, target);
         lastTarget[0] = target[0];
         lastTarget[1] = target[1];
         hit = shotEffect[0];
         sink = shotEffect[1];
-        if(hit) {
-            internalGameBoard[lastTarget[0]][lastTarget[1]] = 4;
-        }else{
-            internalGameBoard[lastTarget[0]][lastTarget[1]] = 5;
-        }
+        if(shotEffect[0]) internalGameBoard[target[0]][target[1]] = 4;
+        else internalGameBoard[target[0]][target[1]] = 5;
     }
+
     /**
      *
-     * @return a target that has not been previously shot.
+     * @return a target
      */
     public int[] getTarget(){
         Random randomPicker = new Random();
@@ -82,17 +73,56 @@ public class GameEnemyBrain {
                                 && !(row == lastTarget[0] && col == lastTarget[1])) {
                             target[0] = row;
                             target[1] = col;
-                            possibleTargets.add(target);
+                            //I create a TargetClass object and add it to the list of possible targets.
+                            possibleTargets.add(new TargetClass(target, lastTarget));
                         }
                     }
                 }
             }
         }
-        Iterator<int[]> iter = possibleTargets.iterator();
-        target = iter.next();
+        //Using Collections.sort(Comparator) // I implemented Comparable therefore I did not need a Comparator.
+        possibleTargets.sort(null);
+        Iterator<TargetClass> iter = possibleTargets.iterator();
+        target = iter.next().getTarget();
         lastTarget = target;
         iter.remove();
 
         return target;
+    }
+
+
+    /**
+    * The TargetClass exists so I can easily sort the targets by distance from last target. I implemented Comparable so
+     * I had to override compareTo to use the distance from last successful target.
+     */
+    class TargetClass implements Comparable{
+        int[] target;
+        int distanceFromLast;
+
+        TargetClass(int[] target, int[] last){
+            this.target = target;
+            calculateDistanceFrom(last);
+        }
+
+        private void calculateDistanceFrom(int[] last){
+            if(last[0] == target[0]){
+                distanceFromLast = Math.abs(target[1] - last[1]);
+            }else{
+                distanceFromLast = Math.abs(target[0] - last[0]);
+            }
+        }
+        public int[] getTarget(){
+            return target;
+        }
+        @Override
+        public int compareTo(Object o) {
+            int rt = 0;
+             if (distanceFromLast < ((TargetClass)o).distanceFromLast) {
+                rt = -1;
+            } else if (distanceFromLast > ((TargetClass)o).distanceFromLast) {
+                rt = 1;
+            }
+            return rt;
+        }
     }
 }

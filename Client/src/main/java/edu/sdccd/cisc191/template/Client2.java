@@ -18,7 +18,7 @@ import java.net.Socket;
 import java.util.Optional;
 
 
-public class Client extends Application implements BattleShipConstants {
+public class Client2 extends Application implements BattleShipConstants {
     private static Socket socket;
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
@@ -39,7 +39,7 @@ public class Client extends Application implements BattleShipConstants {
 
     public void startConnection(String ip, int port) {
         try {
-             client = new Client();
+            client = new Client();
             //client.startConnection("127.0.0.1", 4444);
             socket = new Socket(ip, port);
             // System.out.println("Going in");
@@ -49,7 +49,7 @@ public class Client extends Application implements BattleShipConstants {
             // System.out.println("After in");
             myRequest = new PlayerRequest(id, null);
             connectionMade = true;
-           talkToServer();
+             talkToServer();
             //new Thread(new clientThread()).start();
         }catch(Exception e){}
     }
@@ -65,25 +65,26 @@ public class Client extends Application implements BattleShipConstants {
 
         try {
             //
-             out.reset();
-             out.writeObject(myRequest);
-             listenToServer();
+            out.reset();
+            out.writeObject(myRequest);
+            listenToServer();
             //client.stopConnection();
-             System.out.println(serverResponse);
+            System.out.println(serverResponse);
 
-         }catch(Exception e){
+        }catch(Exception e){
             System.out.println("Talking to server...Exception");
-        e.printStackTrace();
-         }
+            e.printStackTrace();
+        }
     }
-
     public void listenToServer(){
-        try {
+        try{
             serverResponse = (ServerResponse) in.readObject();
         }catch (Exception e){}
     }
+
+
     public static void main(String[] args) {
-            launch();
+        launch();
     }
 
     @Override
@@ -97,12 +98,12 @@ public class Client extends Application implements BattleShipConstants {
         shipCount = new GameBoardLabel(1);
         gameCanvasBorderPane = new BorderPane();
         myStage = stage;
-       // player = new Player();
-    if(!connectionMade){startConnection("localhost",4444);}
-      //talkToServer();
-       update();
-    initial = true;
-       display();
+        // player = new Player();
+        if(!connectionMade){startConnection("localhost",4445);}
+        // talkToServer();
+        update();
+        initial = true;
+        display();
     }
 
     public void stop() throws IOException {
@@ -112,35 +113,35 @@ public class Client extends Application implements BattleShipConstants {
     boolean initial;
     public void display(){
         BorderPane root = new BorderPane();
-       if(initial) {
-           for (int col = 0; col < DIMENSION; col++)
-               for (int row = 0; row < DIMENSION; row++) {
-                   GameBoardButton button = new GameBoardButton(row, col);
-                   int finalRow = row;
-                   int finalCol = col;
-                   button.setOnAction(e -> {
-                       //myRequest.setTarget(null);
-                       //listenToServer();
-                       if (!serverResponse.isGameOver && serverResponse.isMyTurn) {
-                           int[] target = {finalRow, finalCol};
-                           myRequest = new PlayerRequest(id, target);
-                           System.out.println(myRequest);
-                           talkToServer();
-                           button.handleClick(serverResponse.wasLastTargetAHit);
-                           update();
-                           }
+        if(initial) {
+            for (int col = 0; col < DIMENSION; col++)
+                for (int row = 0; row < DIMENSION; row++) {
+                    GameBoardButton button = new GameBoardButton(row, col);
+                    int finalRow = row;
+                    int finalCol = col;
+                    button.setOnAction(e -> {
+                        //myRequest.setTarget(null);
+                        //talkToServer();
+                        if (!serverResponse.isGameOver && serverResponse.isMyTurn) {
+                            int[] target = {finalRow, finalCol};
+                            myRequest = new PlayerRequest(id, target);
+                            System.out.println(myRequest);
+                            talkToServer();
+                            button.handleClick(serverResponse.wasLastTargetAHit);
+                            update();
+                        }
 
-                   });
-                   buttonGrid.add(button, row, col);
-               }
-           initial = false;
-       }
+                    });
+                    buttonGrid.add(button, row, col);
+                }
+            initial = false;
+        }
         root.setLeft(buttonGrid);
         root.setCenter(gameCanvasBorderPane);
 
         scene = new Scene(root, 830, 500, Color.WHITE);
         myStage.setTitle("BattleShip!");
-       myStage.setScene(scene);
+        myStage.setScene(scene);
         myStage.show();
     }
     public void update() {
@@ -167,9 +168,9 @@ public class Client extends Application implements BattleShipConstants {
     }
     private void draw(){
         //Create a 10 X 10 grid of tiles to represent the players game board. This grid will display the computer's shots.
-       // int TILE_W = 30 = TILE_H;
+        // int TILE_W = 30 = TILE_H;
         displayBoard();
-        tileGrid = new BoardDisplay(board, TILE_W, TILE_H, Color.RED).getDisplayBoard();
+        tileGrid = new BoardDisplay(board, TILE_W, TILE_H, Color.BLUE).getDisplayBoard();
         VBox gameHud = new VBox(enemyShipsSunk, shipsSunk, shipCount, message);
         gameCanvasBorderPane.setTop(gameHud);
         gameCanvasBorderPane.setBottom(tileGrid);
@@ -206,7 +207,7 @@ public class Client extends Application implements BattleShipConstants {
             try {
                 while(connectionMade) {
                     listenToServer();
-                    update();
+                    //update();
                     Thread.sleep(1000);
                 }
 
